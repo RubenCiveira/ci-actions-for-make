@@ -1,0 +1,66 @@
+#!/bin/bash
+
+#
+# Set the version on the project management file (pom.xml, gradle.build, package.json...)
+# Print a line for each file
+# A line that starts with - or [ will be precessed as log
+#
+set_version() {
+	:
+}
+
+#
+# Execute a lint over the project, and print the list of files with the reports to archive.
+# A line that starts with - or [ will be precessed as log
+# return 0 if the lint is rigth
+# return 1 if the lint is wrong
+# we can use `if [ $? -eq 0 ]; then` to check lint result 
+# 
+lint() {
+	:
+}
+
+#
+# Execute a sast over the project, and print the list of files with the reports to archive.
+# A line that starts with - or [ will be precessed as log
+# return 0 if the sast is rigth
+# return 1 if the sast is wrong
+# we can use `if [ $? -eq 0 ]; then` to check lint result 
+# 
+sast() {
+	:
+}
+
+#
+# Execute a test over the project, and print the list of files with the reports to archive.
+# A line that starts with - or [ will be precessed as log
+# return 0 if the test is rigth
+# return 1 if the test is wrong
+# we can use `if [ $? -eq 0 ]; then` to check lint result 
+# 
+test() {
+	:
+}
+
+#
+# Execute a build over the project, and print the list of files with the reports to archive.
+# A line that starts with - or [ will be precessed as log
+# return 0 if the build is rigth
+# return 1 if the build is wrong
+# we can use `if [ $? -eq 0 ]; then` to check lint result 
+# 
+build() {
+	:
+}
+
+#
+# Execute a report over the project, and print the list of files with the reports to archive.
+# A line that starts with - or [ will be precessed as log
+# return 0 if the report is rigth
+# return 1 if the report is wrong
+# we can use `if [ $? -eq 0 ]; then` to check lint result 
+# 
+report() {
+	:
+}
+
