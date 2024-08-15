@@ -23,6 +23,8 @@ lint:
 	@.actions/build/lint.sh
 sast:
 	@.actions/build/sast.sh
+verify:
+	@.actions/build/verify.sh
 test:
 	@.actions/build/test.sh
 build:

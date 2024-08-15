@@ -14,12 +14,12 @@ lint() {
 	local TEMP="pmd-pom.xml"
 	echo "- Running local owsp dependency check"
 	append_profile "pom.xml" ".actions/conf/maven/pmd-profile.xml" $TEMP
-	$MVN clean pmd:pmd pmd:cpd pmd:check pmd:cpd-check -f $TEMP -Ppmd-profile -q -DforceStdout >/dev/null 2>&1
+	$MVN clean pmd:pmd pmd:cpd pmd:check pmd:cpd-check -Dformat=csv -f $TEMP -Ppmd-profile -q -DforceStdout >/dev/null 2>&1
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
-	echo "./target/cpd.xml"
-	echo "./target/pmd.xml"
+	echo "./target/cpd.csv"
+	echo "./target/pmd.csv"
 	return $result
 }
 
@@ -40,40 +40,91 @@ sast() {
 	return $result
 }
 
-test() {
+verify() {
 	local TEMP="jacoco-pom.xml"
 	local PARAMS=""
 	echo "- Running maven tests and jacoco coverage"
 	append_profile "pom.xml" ".actions/conf/maven/jacoco-profile.xml" $TEMP
-	if [[ "$REQUIRED_COVERAGE_INTRUCTIONS" != "" ]]; then
-		echo "- Coverage of instructions at least of 0.$REQUIRED_COVERAGE_INTRUCTIONS"
-		PARAMS="$PARAMS -Djacoco.min-coverage.instructions=$REQUIRED_COVERAGE_INTRUCTIONS"
+	if [[ "$REQUIRED_COVERAGE" != "" ]]; then
+		echo "- Coverage of $REQUIRED_COVERAGE"
+		local RESULT_REQUIRED_COVERAGE=$(echo "scale=2; $REQUIRED_COVERAGE / 100" | bc)
+		PARAMS="$PARAMS -Djacoco.min-coverage.instructions=$REQUIRED_COVERAGE  -Djacoco.min-coverage.branches=$REQUIRED_COVERAGE"
 	else
-		echo "- No explicit instructions coverage, using 00 (use REQUIRED_COVERAGE_INTRUCTIONS to define)"
-		PARAMS="$PARAMS -Djacoco.min-coverage.instructions=00"
+		echo "- No explicit coverage, using 00 (use REQUIRED_COVERAGE to define)"
+		PARAMS="$PARAMS -Djacoco.min-coverage.instructions=0.00  -Djacoco.min-coverage.branches=0.00"
 	fi
-	if [[ "$REQUIRED_COVERAGE_BRANCHES" != "" ]]; then
-		echo "- Coverage of branches at least of 0.$REQUIRED_COVERAGE_BRANCHES"
-		PARAMS="$PARAMS  -Djacoco.min-coverage.branches=$REQUIRED_COVERAGE_BRANCHES"
-	else
-		echo "- No explicit branches coverage, using 00 (use REQUIRED_COVERAGE_BRANCHES to define)"
-		PARAMS="$PARAMS  -Djacoco.min-coverage.branches=00"
-	fi
-	echo "mvn clean verify -f $TEMP -Pjacoco-profile $PARAMS"
 	$MVN clean verify -f $TEMP -Pjacoco-profile $PARAMS -q -DforceStdout >/dev/null 2>&1
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
-	echo "./target/site/jacoco.csv"
+	echo "./target/site/jacoco/jacoco.csv"
+	return $result
+}
+
+test() {
+	local TEMP="pit-pom.xml"
+	local PARAMS=""
+	echo "- Running maven mutation tests with pit"
+	append_profile "pom.xml" ".actions/conf/maven/pit-profile.xml" $TEMP
+	if [[ "$REQUIRED_COVERAGE" != "" ]]; then
+		echo "- Coverage of $REQUIRED_COVERAGE"
+		PARAMS="$PARAMS -DmutationThreshold=$REQUIRED_COVERAGE"
+	else
+		echo "- No explicit coverage, using 00 (use REQUIRED_COVERAGE to define)"
+		PARAMS="$PARAMS -DmutationThreshold=0"
+	fi
+	
+	$MVN clean verify -f $TEMP -Ppit-profile $PARAMS -q -DforceStdout >/dev/null 2>&1
+	# to retrieve $? the local definition must be before maven execution
+	result=$?
+	rm $TEMP
+	echo "./target/pit-reports/mutations.csv"
 	return $result
 }
 
 build() {
-	return 0
+	local PARAMS=""
+	$MVN clean verify $PARAMS -q -DskipTests=true -q -DforceStdout >/dev/null 2>&1
+	# to retrieve $? the local definition must be before maven execution
+	result=$?
+	
+	local artifactName=$(artifact_name_without_extension)
+	local extension=$(artifact_packaging_extension)
+	
+	if [[ "$FINAL_NAME" != "" ]]; then
+		mv "./target/${artifactName}.${extension}" "./target/${FINAL_NAME}.${extension}"
+		artifactName="$FINAL_NAME"
+	fi
+	echo "./target/${artifactName}.${extension}"
+	return $result
+}
+
+get_artifact_name() {
+	local artifactName=$(artifact_name_without_extension)
+	local packaging=$(artifact_packaging_extension)
+	echo "./target/${artifactName}.${packaging}"
 }
 
 report() {
 	return 0
+}
+
+artifact_packaging_extension() {
+	local packaging=$(mvn help:evaluate -Dexpression=project.packaging -q -DforceStdout)
+	echo $packaging
+}
+
+artifact_name_without_extension() {
+	local artifactName=""
+	local finalName=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout)
+	if [ -n "$finalName" ]; then
+		artifactName="$finalName"
+	else
+		local artifactId=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+		local version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+		artifactName="$artifactId-$version"
+	fi
+	echo "$artifactName"
 }
 
 append_profile() {

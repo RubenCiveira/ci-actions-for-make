@@ -6,6 +6,10 @@ RELEASE_BRANCH=release
 
 CHANGELOG_FILE=CHANGELOG.md
 
+FINAL_NAME=mio
+BUILDING_REPORTS_DIR=reports
+
+
 source .actions/lib/build-commons.sh
 source .actions/lib/flow-commons.sh
 

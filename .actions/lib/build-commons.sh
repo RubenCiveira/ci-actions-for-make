@@ -3,7 +3,19 @@
 source .actions/lib/source-interface.sh
 
 run_build() {
-	build
+	echo "- Building"
+	local FILES
+	# To store $? the local and the capture must be two differnt calls
+	FILES=$(build)
+	local result="$?"
+	log_phase_file "build" "$FILES"
+	if [ $result -eq 0 ]; then
+	    echo "- Build ok."
+	else
+	    echo "- The build verification was wrong."
+	fi
+	save_phase_files "build" "$FILES"
+	return $result
 }
 
 run_lint() {
@@ -43,6 +55,22 @@ run_sast() {
 	return $result
 }
 
+run_verify() {
+	echo "- Running verify"
+	local FILES
+	# To store $? the local and the capture must be two differnt calls
+	FILES=$(verify)
+	local result="$?"
+	log_phase_file "verify" "$FILES"
+	if [ $result -eq 0 ]; then
+	    echo "- Verification ok."
+	else
+	    echo "- The verification fail."
+	fi
+	save_phase_files "verification" "$FILES"
+	return $result
+}
+
 run_test() {
 	echo "- Running test"
 	local FILES
@@ -67,16 +95,24 @@ run_test() {
 save_phase_files() {
   local PHASE="$1"
   local FILES="$2"
-  if [[ "$FILES" != "" ]]; then
-	echo "- Store files from $PHASE"
+  if [[ "$BUILDING_REPORTS_DIR" != "" ]]; then
+	  if [[ "$FILES" != "" ]]; then
+		echo "- Store files from $PHASE"
+	  else
+	  	echo "- No files to store in $PHASE"
+	  fi
+	  while IFS= read -r file; do
+	    if [[ ! "$file" =~ ^[-[] ]]; then
+	      if [ -f "$file" ]; then
+	        mv "$file" "$BUILDING_REPORTS_DIR"
+	      else
+	      	echo "    > El fichero $file no existe."
+	      fi
+	    fi
+	  done <<< "$FILES"
   else
-  	echo "- No files to store in $PHASE"
+  	echo "- There is no directory to store build output files, use BUILDING_REPORTS_DIR to it"
   fi
-  while IFS= read -r file; do
-    if [[ ! "$file" =~ ^[-[] ]]; then
-      echo "   > $file"
-    fi
-  done <<< "$FILES"
 }
 
 log_phase_file() {
@@ -89,3 +125,10 @@ log_phase_file() {
   done <<< "$FILES"
 
 }
+
+if [ -n "$BUILDING_REPORTS_DIR" ]; then
+    if [ ! -d "$BUILDING_REPORTS_DIR" ]; then
+        # Crear el directorio si no existe
+    	mkdir -p "$BUILDING_REPORTS_DIR"
+    fi
+fi

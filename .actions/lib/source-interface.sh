@@ -9,6 +9,11 @@ set_version() {
 	:
 }
 
+# Retrieve the name of the final artifact that would be generated
+get_artifact_name() {
+	:
+}
+
 #
 # Execute a lint over the project, and print the list of files with the reports to archive.
 # A line that starts with - or [ will be precessed as log
@@ -32,7 +37,19 @@ sast() {
 }
 
 #
-# Execute a test over the project, and print the list of files with the reports to archive.
+# Execute a quick set of tests over the project, and print the list of files with the reports to archive.
+# A line that starts with - or [ will be precessed as log
+# return 0 if the test is rigth
+# return 1 if the test is wrong
+# we can use `if [ $? -eq 0 ]; then` to check lint result 
+# 
+verify() {
+	:
+}
+
+
+#
+# Execute a complete and long set of tests over the project, and print the list of files with the reports to archive.
 # A line that starts with - or [ will be precessed as log
 # return 0 if the test is rigth
 # return 1 if the test is wrong

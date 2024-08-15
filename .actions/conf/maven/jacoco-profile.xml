@@ -36,12 +36,12 @@
 										<limit>
 											<counter>INSTRUCTION</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.${jacoco.min-coverage.instructions}</minimum>
+											<minimum>${jacoco.min-coverage.instructions}</minimum>
 										</limit>
 										<limit>
 											<counter>BRANCH</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.${jacoco.min-coverage.branches}</minimum>
+											<minimum>${jacoco.min-coverage.branches}</minimum>
 										</limit>
 									</limits>
 								</rule>
