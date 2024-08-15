@@ -36,7 +36,19 @@ run_lint() {
 }
 
 run_report() {
-	report
+	echo "- Running report"
+	local FILES
+	# To store $? the local and the capture must be two differnt calls
+	FILES=$(report "$1")
+	local result="$?"
+	log_phase_file "report" "$FILES"
+	if [ $result -eq 0 ]; then
+	    echo "- Report ok."
+	else
+	    echo "- There was fails generating reports."
+	fi
+	save_phase_files "report" "$FILES"
+	return $result
 }
 
 run_sast() {

@@ -5,6 +5,8 @@ create-feature-branch-%:
 	@.actions/local/create-new-branch.sh "feat/$*"
 update-with-develop:
 	@.actions/local/update-with-develop.sh
+pdf-%:
+	@.actions/build/report.sh "$*"
 
 merge-public-release:
 	@.actions/flow/merge-public-release.sh

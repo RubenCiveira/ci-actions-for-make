@@ -2,4 +2,5 @@
 
 source .actions/.env.sh
 
-run_report
+# Esta tarea es especial, se puede indicar como parámetro un uni
+run_report "$1"

@@ -106,7 +106,21 @@ get_artifact_name() {
 }
 
 report() {
-	return 0
+	local FILE="$1"
+	local TEMP="pdf-pom.xml"
+	local PARAMS=""
+	if [[ "$FILE" != "" ]]; then
+		FILE=$(echo "$FILE" | sed 's/ /\\ /g')
+		PARAMS="$PARAMS -Dinput.book=$FILE"
+	fi
+	echo "- Running maven pdf generation"
+	cp ".actions/conf/maven/pdf-pom.xml" $TEMP
+	$MVN clean verify -f $TEMP -Ppdf $PARAMS -q -DforceStdout >/dev/null 2>&1
+	# to retrieve $? the local definition must be before maven execution
+	result=$?
+	rm $TEMP
+	find ./target/pdf -type f
+	return $result
 }
 
 artifact_packaging_extension() {
