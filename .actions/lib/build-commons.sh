@@ -7,7 +7,20 @@ run_build() {
 }
 
 run_lint() {
-	lint
+	echo "- Running lint"
+	
+	local FILES
+	# To store $? the local and the capture must be two differnt calls
+	FILES=$(lint)
+	local result="$?"
+	log_phase_file "sast" "$FILES"
+	if [ $result -eq 0 ]; then
+	    echo "- Lint ok."
+	else
+	    echo "- The lint verification was wrong."
+	fi
+	save_phase_files "lint" "$FILES"
+	return $result
 }
 
 run_report() {
@@ -22,17 +35,29 @@ run_sast() {
 	local result="$?"
 	log_phase_file "sast" "$FILES"
 	if [ $result -eq 0 ]; then
-	    echo "- No se encontraron dependencias vulnerables."
+	    echo "- Sast ok."
 	else
-	    echo "- Se encontraron dependencias vulnerables."
+	    echo "- The sast verification was wrong."
 	fi
 	save_phase_files "sast" "$FILES"
+	return $result
 }
 
 run_test() {
-	test
+	echo "- Running test"
+	local FILES
+	# To store $? the local and the capture must be two differnt calls
+	FILES=$(test)
+	local result="$?"
+	log_phase_file "test" "$FILES"
+	if [ $result -eq 0 ]; then
+	    echo "- Test ok."
+	else
+	    echo "- The test verification was wrong."
+	fi
+	save_phase_files "test" "$FILES"
+	return $result
 }
-
 
 #
 # Set project version, retrieve the list of modified files, and add all of them to the stash
@@ -42,10 +67,14 @@ run_test() {
 save_phase_files() {
   local PHASE="$1"
   local FILES="$2"
-  echo "- On $PHASE"
+  if [[ "$FILES" != "" ]]; then
+	echo "- Store files from $PHASE"
+  else
+  	echo "- No files to store in $PHASE"
+  fi
   while IFS= read -r file; do
     if [[ ! "$file" =~ ^[-[] ]]; then
-      echo "   > Need to save $file"
+      echo "   > $file"
     fi
   done <<< "$FILES"
 }
