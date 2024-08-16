@@ -118,8 +118,10 @@ save_phase_files() {
 	      if [ -f "$file" ]; then
 	        mv "$file" "$BUILDING_REPORTS_DIR"
 	      elif [ -d "$file" ]; then
-			if [ -d "$BUILDING_REPORTS_DIR/$(basename "$file")" ]; then
-			    rm -rf "$BUILDING_REPORTS_DIR/$(basename "$file")"
+	      	local TARGET=$(basename "$file")
+	      	echo "- Copiando la carpeta $file viendo a $TARGET"
+			if [ -d "$BUILDING_REPORTS_DIR/$TARGET" ]; then
+			    rm -rf "$BUILDING_REPORTS_DIR/$TARGET"
 			fi
 	        mv "$file" "$BUILDING_REPORTS_DIR"
 	      else
