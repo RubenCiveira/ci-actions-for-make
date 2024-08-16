@@ -75,21 +75,23 @@
 								</goals>
 								<configuration>
 									<attributes>
-										<source-highlighter>coderay</source-highlighter>
 										<kroki-server-url>${kroki.server}</kroki-server-url>
+										<kroki-fetch-diagram>true</kroki-fetch-diagram>
+										<kroki-default-format>png</kroki-default-format>
+										<kroki-http-method>post</kroki-http-method>
 										<!-- kroki require these images directory -->
 										<imagesdir>../images</imagesdir>
-										<kroki-fetch-diagram>true</kroki-fetch-diagram>
-										<toclevels>3</toclevels>
-										<kroki-default-format>png</kroki-default-format>
-										<icons>font</icons>
-										<kroki-http-method>post</kroki-http-method>
-										<toclevels>3</toclevels>
-										<icons>font</icons>
-										<toc>right</toc>
 										<allow-uri-read>true</allow-uri-read>
+										<source-highlighter>coderay</source-highlighter>
+										<icons>font</icons>
+										<!--
+										<toc>right</toc>
+										<toclevels>3</toclevels>
+										
 										<pdf-theme>./${pdf.theme}</pdf-theme>
 										<pdf-themesdir>./theme</pdf-themesdir>
+										<pdf-theme></pdf-theme>
+										-->
 									</attributes>
 									<backend>pdf</backend>
 									<baseDir>${project.build.directory}/tmp</baseDir>
