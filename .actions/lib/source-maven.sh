@@ -18,8 +18,10 @@ lint() {
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
-	echo "./target/cpd.csv"
-	echo "./target/pmd.csv"
+	mkdir ./target/lint
+	mv ./target/cpd.csv ./target/lint/cpd.csv
+	mv ./target/pmd.csv ./target/lint/pmd.csv
+	echo "./target/lint"
 	return $result
 }
 
@@ -37,6 +39,11 @@ sast() {
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	echo "./target/dependency-check-report.csv"
+	
+	mkdir ./target/sast
+	mv ./target/dependency-check-report.csv ./target/sast/dependency-check-report.csv
+	echo "./target/sast"
+	
 	return $result
 }
 
@@ -57,7 +64,11 @@ verify() {
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
-	echo "./target/site/jacoco/jacoco.csv"
+	
+	mkdir ./target/verify
+	mv ./target/site/jacoco/jacoco.csv ./target/verify/jacoco.csv
+	echo "./target/verify"
+	
 	return $result
 }
 
@@ -78,6 +89,11 @@ test() {
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
+	
+	mkdir ./target/test
+	mv ./target/site/jacoco/jacoco.csv ./target/test/jacoco.csv
+	echo "./target/test"
+	
 	echo "./target/pit-reports/mutations.csv"
 	return $result
 }
@@ -95,14 +111,12 @@ build() {
 		mv "./target/${artifactName}.${extension}" "./target/${FINAL_NAME}.${extension}"
 		artifactName="$FINAL_NAME"
 	fi
-	echo "./target/${artifactName}.${extension}"
+	
+	mkdir ./target/build
+	mv "./target/${artifactName}.${extension}" "./target/build/${artifactName}.${extension}"
+	echo "./target/build"
+	
 	return $result
-}
-
-get_artifact_name() {
-	local artifactName=$(artifact_name_without_extension)
-	local packaging=$(artifact_packaging_extension)
-	echo "./target/${artifactName}.${packaging}"
 }
 
 report() {
@@ -119,8 +133,19 @@ report() {
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
-	find ./target/pdf -type f
+	
+	# find ./target/pdf -type f
+	mv "./target/pdf" "./target/report"
+	echo "./target/report"
+	
+	
 	return $result
+}
+
+get_artifact_name() {
+	local artifactName=$(artifact_name_without_extension)
+	local packaging=$(artifact_packaging_extension)
+	echo "./target/${artifactName}.${packaging}"
 }
 
 artifact_packaging_extension() {

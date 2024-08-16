@@ -117,6 +117,11 @@ save_phase_files() {
 	    if [[ ! "$file" =~ ^[-[] ]]; then
 	      if [ -f "$file" ]; then
 	        mv "$file" "$BUILDING_REPORTS_DIR"
+	      elif [ -d "$file" ]; then
+			if [ -d "$BUILDING_REPORTS_DIR/$(basename "$file")" ]; then
+			    rm -rf "$BUILDING_REPORTS_DIR/$(basename "$file")"
+			fi
+	        mv "$file" "$BUILDING_REPORTS_DIR"
 	      else
 	      	echo "    > El fichero $file no existe."
 	      fi
