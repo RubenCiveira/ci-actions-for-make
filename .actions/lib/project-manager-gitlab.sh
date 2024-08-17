@@ -1,5 +1,6 @@
 #!/bin/bash
 
+MANAGEMENT_REPOSITORY=gitlab
 #
 # if is not the self repository
 #

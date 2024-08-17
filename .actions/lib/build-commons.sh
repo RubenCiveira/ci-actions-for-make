@@ -2,6 +2,46 @@
 
 source .actions/lib/source-interface.sh
 
+has_debug() {
+	if [[ "$DEBUG" == "true" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+has_log() {
+	if [[ "$LOG" == "true" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+log() {
+	if has_log; then
+		echo "$1"
+	fi
+}
+
+run_deploy() {
+	echo "- Deploying"
+	deploy
+	exit
+	local FILES
+	# To store $? the local and the capture must be two differnt calls
+	FILES=$(deploy)
+	local result="$?"
+	log_phase_file "deploy" "$FILES"
+	if [ $result -eq 0 ]; then
+	    echo "- Deploy ok."
+	else
+	    echo "- The deploy verification was wrong."
+	fi
+	save_phase_files "deploy" "$FILES"
+	return $result
+}
+
 run_build() {
 	echo "- Building"
 	local FILES

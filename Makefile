@@ -31,5 +31,7 @@ test:
 	@.actions/build/test.sh
 build:
 	@.actions/build/build.sh
+deploy:
+	@.actions/build/deploy.sh
 report:
 	@.actions/build/report.sh

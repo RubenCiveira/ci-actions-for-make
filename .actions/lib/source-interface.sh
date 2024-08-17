@@ -81,3 +81,14 @@ report() {
 	:
 }
 
+#
+# Execute a deploy over the project, and print the list of files with the reports to archive.
+# A line that starts with - or [ will be precessed as log
+# return 0 if the deploy is rigth
+# return 1 if the deploy is wrong
+# we can use `if [ $? -eq 0 ]; then` to check lint result 
+# 
+deploy() {
+	:
+}
+

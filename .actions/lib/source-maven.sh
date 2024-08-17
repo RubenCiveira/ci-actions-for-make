@@ -3,18 +3,30 @@ MVN=./mvnw
 
 # NVD_API_KEY
 #        an access token to gitlab
+
+
 set_project_version() {
 	local snap_version=$1
 	$MVN versions:set -DnewVersion=$snap_version -DgenerateBackupPoms=false -q -DforceStdout >/dev/null 2>&1 
 	echo "pom.xml"
 }
 
+get_project_version() {
+	local snap_version=$1
+	$MVN help:evaluate -Dexpression=project.version -q -DforceStdout
+}
+
+
 lint() {
 	local result=0
 	local TEMP="pmd-pom.xml"
 	echo "- Running local owsp dependency check"
 	append_profile "pom.xml" ".actions/conf/maven/pmd-profile.xml" $TEMP
-	$MVN clean pmd:pmd pmd:cpd pmd:check pmd:cpd-check -Dformat=csv -f $TEMP -Ppmd-profile -q -DforceStdout >/dev/null 2>&1
+	if log; then
+		$MVN clean pmd:pmd pmd:cpd pmd:check pmd:cpd-check -Dformat=csv -f $TEMP -Ppmd-profile >&2
+	else
+		$MVN clean pmd:pmd pmd:cpd pmd:check pmd:cpd-check -Dformat=csv -f $TEMP -Ppmd-profile -q -DforceStdout >/dev/null 2>&1
+	fi
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
@@ -35,7 +47,12 @@ sast() {
 	else
 		echo "- Without nvd api key. (get one and assging to NVD_API_KEY env variable)"
 	fi
-	$MVN clean org.owasp:dependency-check-maven:check -Dformat=CSV -DfailBuildOnCVSS=7 -Denforce.failBuild=true $PARAMS -q -DforceStdout >/dev/null 2>&1
+	if log; then
+		$MVN clean org.owasp:dependency-check-maven:check -Dformat=CSV -DfailBuildOnCVSS=7 -Denforce.failBuild=true $PARAMS >&2
+	else
+		$MVN clean org.owasp:dependency-check-maven:check -Dformat=CSV -DfailBuildOnCVSS=7 -Denforce.failBuild=true $PARAMS -q -DforceStdout >/dev/null 2>&1
+	fi
+
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	echo "./target/dependency-check-report.csv"
@@ -60,7 +77,11 @@ verify() {
 		echo "- No explicit coverage, using 00 (use REQUIRED_COVERAGE to define)"
 		PARAMS="$PARAMS -Djacoco.min-coverage.instructions=0.00  -Djacoco.min-coverage.branches=0.00"
 	fi
-	$MVN clean verify -f $TEMP -Pjacoco-profile $PARAMS -q -DforceStdout >/dev/null 2>&1
+	if log; then
+		$MVN clean verify -f $TEMP -Pjacoco-profile $PARAMS >&2
+	else
+		$MVN clean verify -f $TEMP -Pjacoco-profile $PARAMS -q -DforceStdout >/dev/null 2>&1
+	fi
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
@@ -85,7 +106,12 @@ test() {
 		PARAMS="$PARAMS -DmutationThreshold=0"
 	fi
 	
-	$MVN clean verify -f $TEMP -Ppit-profile $PARAMS -q -DforceStdout >/dev/null 2>&1
+	if log; then
+		$MVN clean verify -f $TEMP -Ppit-profile $PARAMS >&2
+	else
+		$MVN clean verify -f $TEMP -Ppit-profile $PARAMS -q -DforceStdout >/dev/null 2>&1
+	fi
+	
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
@@ -100,7 +126,15 @@ test() {
 
 build() {
 	local PARAMS=""
-	$MVN clean verify $PARAMS -q -DskipTests=true -q -DforceStdout >/dev/null 2>&1
+	if has_debug; then
+		PARAMS="$PARAMS -X"
+	fi
+	log "- Starting building with maven"
+	if log; then
+		$MVN clean package $PARAMS -DskipTests=true >&2
+	else
+		$MVN clean package $PARAMS -DskipTests=true -q -DforceStdout >/dev/null 2>&1
+	fi
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	
@@ -112,9 +146,32 @@ build() {
 		artifactName="$FINAL_NAME"
 	fi
 	
-	mkdir ./target/build
-	mv "./target/${artifactName}.${extension}" "./target/build/${artifactName}.${extension}"
-	echo "./target/build"
+	return $result
+}
+
+deploy() {
+	local PARAMS=""
+	if has_debug; then
+		PARAMS="$PARAMS -X"
+	fi
+	if log; then
+		$MVN clean package $PARAMS -DskipTests=true >&2
+	else
+		$MVN clean package $PARAMS -DskipTests=true -q -DforceStdout >/dev/null 2>&1
+	fi
+	# to retrieve $? the local definition must be before maven execution
+	result=$?
+	
+	if [[ "$result" == "0" ]]; then
+		local version=$(get_project_version)
+	
+	
+		docker login registry.gitlab.com -u $DOCKER_HARBOUR_USER -p $DOCKER_HARBOUR_PASS >&2 && \
+			docker build -f src/main/docker/Dockerfile.jvm -t dagda/security .  >&2 && \
+			docker tag dagda/security $DOCKER_HARBOUR_URL:$version  >&2 && \
+			docker push $DOCKER_HARBOUR_URL:$version >&2
+		result=$?
+	fi
 	
 	return $result
 }
@@ -129,7 +186,12 @@ report() {
 	fi
 	echo "- Running maven pdf generation"
 	cp ".actions/conf/maven/pdf-pom.xml" $TEMP
-	$MVN clean verify -f $TEMP -Ppdf $PARAMS -q -DforceStdout >/dev/null 2>&1
+	if log; then
+		$MVN clean verify -f $TEMP -Ppdf $PARAMS >&2
+	else
+		$MVN clean verify -f $TEMP -Ppdf $PARAMS -q -DforceStdout >/dev/null 2>&1
+	fi
+	
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
 	rm $TEMP
@@ -149,18 +211,18 @@ get_artifact_name() {
 }
 
 artifact_packaging_extension() {
-	local packaging=$(mvn help:evaluate -Dexpression=project.packaging -q -DforceStdout)
+	local packaging=$($MVN help:evaluate -Dexpression=project.packaging -q -DforceStdout)
 	echo $packaging
 }
 
 artifact_name_without_extension() {
 	local artifactName=""
-	local finalName=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout)
+	local finalName=$($MVN help:evaluate -Dexpression=project.build.finalName -q -DforceStdout)
 	if [ -n "$finalName" ]; then
 		artifactName="$finalName"
 	else
-		local artifactId=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
-		local version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+		local artifactId=$($MVN help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+		local version=$($MVN help:evaluate -Dexpression=project.version -q -DforceStdout)
 		artifactName="$artifactId-$version"
 	fi
 	echo "$artifactName"
