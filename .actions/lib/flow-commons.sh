@@ -235,7 +235,14 @@ merge_upgrade_to_branch_for_version() {
 	# Ya estan sincronizados main - release - develop
 	# Hay una PR creada
 	local PR=$(merge_pr $TARGET_BRANCH temp/$TARGET_BRANCH-$VERSION)
+	local PR_INFO=$(lookup_pr $TARGET_BRANCH temp/$TARGET_BRANCH-$VERSION)
+	local DESCRIPTION=$(read_from_properties "description" "$PR_INFO")
+	
 	echo "- PR #$PR merged"
+	echo "- Debemos ver de crear un tag"
+	local version=$(get_version)
+	git tag -a "v$(version)" -v "$DESCRIPTION"
+	git push origin --tags
 	
 	if [[ "$TARGET_BRANCH" == "$MAIN_BRANCH" || "$TARGET_BRANCH" == "$RELEASE_BRANCH" ]]; then
 		local NEW_RELEASE=$(git_next_version "release")

@@ -9,6 +9,14 @@ set_version() {
 	:
 }
 
+
+#
+# Print the version of the project management file (pom.xml, gradle.build, package.json...)
+#
+get_version() {
+	:
+}
+
 # Retrieve the name of the final artifact that would be generated
 get_artifact_name() {
 	:
