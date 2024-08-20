@@ -29,7 +29,7 @@ lint() {
 	fi
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
-	rm $TEMP
+	# rm $TEMP
 	mkdir ./target/lint
 	mv ./target/cpd.csv ./target/lint/cpd.csv
 	mv ./target/pmd.csv ./target/lint/pmd.csv
@@ -240,19 +240,18 @@ append_profile() {
 	# Verifica si el pom.xml ya tiene una sección <profiles>
 	local PROFILE_CONTENT=$(cat "$PROFILE_FILE")
 	if grep -q "<profiles>" "$POM_FILE"; then
-		local PRE=$(grep -B100000 '</profiles>' "$POM_FILE" | sed '$d')
-		local POST=$(grep '</profiles>' "$POM_FILE" )
+		local PRE=$(sed -n '1,/<\/profiles>/p' "$POM_FILE" | sed '$d')
+    	local POST=$(sed -n '/<\/profiles>/,$p' "$POM_FILE")
 		echo $PRE > "$OUTPUT_FILE"
 		echo "$PROFILE_CONTENT" >> "$OUTPUT_FILE"
 		echo $POST >> "$OUTPUT_FILE"
 	else
-		local PRE=$(grep -B100000 '</project>' "$POM_FILE" | sed '$d')
-		local POST=$(grep '</project>' "$POM_FILE" )
+		local PRE=$(sed -n '1,/<\/project>/p' "$POM_FILE" | sed '$d')
+    	local POST=$(sed -n '/<\/project>/,$p' "$POM_FILE")
 		echo $PRE > "$OUTPUT_FILE"
 		echo "<profiles>$PROFILE_CONTENT</profiles>" >> "$OUTPUT_FILE"
 		echo $POST >> "$OUTPUT_FILE"
 	fi
-	
 	# Guarda el resultado en un nuevo archivo
 	# echo "$OUTPUT_CONTENT" > "$OUTPUT_FILE"
 }

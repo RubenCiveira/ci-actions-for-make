@@ -60,7 +60,6 @@ run_build() {
 
 run_lint() {
 	echo "- Running lint"
-	
 	local FILES
 	# To store $? the local and the capture must be two differnt calls
 	FILES=$(lint)
