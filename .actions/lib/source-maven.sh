@@ -29,7 +29,7 @@ lint() {
 	fi
 	# to retrieve $? the local definition must be before maven execution
 	result=$?
-	# rm $TEMP
+	rm $TEMP
 	mkdir ./target/lint
 	mv ./target/cpd.csv ./target/lint/cpd.csv
 	mv ./target/pmd.csv ./target/lint/pmd.csv
