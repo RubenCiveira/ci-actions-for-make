@@ -17,6 +17,13 @@ get_version() {
 	:
 }
 
+#
+# Format the code
+#
+format_source() {
+	:
+}
+
 # Retrieve the name of the final artifact that would be generated
 get_artifact_name() {
 	:

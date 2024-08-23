@@ -1,6 +1,8 @@
 prepare:
 	@chmod +x .actions/local/prepare.sh
 	@.actions/local/prepare.sh
+format-source:
+	@.actions/local/format-source.sh
 create-feature-branch-%:
 	@.actions/local/create-new-branch.sh "feat/$*"
 update-with-develop:

@@ -1,0 +1,21 @@
+#!/bin/sh
+ARCHIVOS_PROFILE=(
+    "/etc/profile"
+    "$HOME/.bash_profile"
+    "$HOME/.bash_login"
+    "$HOME/.profile"
+    "$HOME/.bashrc"
+    "/etc/zshenv"
+    "$HOME/.zshenv"
+    "/etc/zprofile"
+    "$HOME/.zprofile"
+    "/etc/zshrc"
+    "$HOME/.zshrc"
+    "/etc/zlogin"
+    "$HOME/.zlogin"
+)
+for archivo in "${ARCHIVOS_PROFILE[@]}"; do
+    if [ -f "$archivo" ]; then
+		source "$archivo" >/dev/null 2>&1
+    fi
+done

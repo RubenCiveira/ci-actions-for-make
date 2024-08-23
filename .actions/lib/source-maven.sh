@@ -204,6 +204,10 @@ report() {
 	return $result
 }
 
+format_source() {
+	$MVN -q formatter:format impsort:sort
+}
+
 get_artifact_name() {
 	local artifactName=$(artifact_name_without_extension)
 	local packaging=$(artifact_packaging_extension)
