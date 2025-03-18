@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# source "$SCRIPT_DIR/paths"
+
+# FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+# [ -z "$FILES" ] && exit 0
+
+# make format
+
+# echo "$FILES" | xargs git add
+
+# Si no hay cambios, salimos sin errores
+# if git diff-index --quiet HEAD --; then
+#     exit 0
+# fi
