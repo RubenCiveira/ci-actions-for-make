@@ -1,23 +1,7 @@
 #!/bin/bash
 
-#
-# Set the version on the project management file (pom.xml, gradle.build, package.json...)
-# Print a line for each file
-# A line that starts with - or [ will be precessed as log
-#
-set_version() {
-	:
-}
-
-#
-# Print the version of the project management file (pom.xml, gradle.build, package.json...)
-#
-get_version() {
-	:
-}
-
 get_platform() {
-	ARCH=$(uname -m)
+	local ARCH=$(uname -m)
 	if [[ "$ARCH" == "x86_64" ]]; then
 		echo "amd64"
 	elif [[ "$ARCH" == "amd64" ]]; then
@@ -33,9 +17,9 @@ get_platform() {
 }
 
 get_info() {
-	echo "Artifact: [$(get_name)]"
-	echo "Version: [$(get_version)]"
-	echo "Platform: [$(get_platform)]"
+	# echo "Artifact: [$(get_name)]"
+	echo "Version: [$CURRENT_VERSION]"
+	echo "Platform: [$CURRENT_PLATFORM]"
 }
 
 has_debug() {

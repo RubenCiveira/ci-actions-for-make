@@ -7,23 +7,12 @@ if [[ -f "$SCRIPT_DIR/../.env" ]]; then
 fi
 source $SCRIPT_DIR/../properties.env
 
-# Common
-source "$SCRIPT_DIR/lib/common.sh"
+source $SCRIPT_DIR/artifact.sh
+source $SCRIPT_DIR/common.sh
+source $SCRIPT_DIR/gitflow.sh
 
-# Select by type
-source "$SCRIPT_DIR/lib/impl/maven-lib.sh"
-source "$SCRIPT_DIR/lib/impl/repos-gitlab.sh"
-
-# Flow
-source "$SCRIPT_DIR/lib/maven-info.sh"
-
-# Tasks
-source "$SCRIPT_DIR/lib/maven-tasks.sh"
-
-source "$SCRIPT_DIR/lib/docker-tasks.sh"
-source "$SCRIPT_DIR/lib/impl/git-flows.sh"
-source "$SCRIPT_DIR/lib/impl/git-commons.sh"
-source "$SCRIPT_DIR/lib/git-tasks.sh"
+CURRENT_PLATFORM=$(get_platform)
+CURRENT_VERSION=$(get_version)
 
 if declare -f "$1" > /dev/null; then
 	func="$1"
