@@ -22,17 +22,15 @@ finish_feature() {
 	git merge --no-ff $feature_branch
 	git branch -d $feature_branch
 	git push origin develop
+	git push origin --delete "$feature_branch"
+	
 }
 
 feature_branch() {
     local name="$1"
 
-    if [[ -z "$DEVELOP_BRANCH_PROTECTED" ]]; then
-        echo "Develop está protegida"
-		return 1
-    fi
 	if [[ -z "$name" ]]; then
-		echo "Uso: ./run.sh start_feature nombre"
+		echo "❌ No se indica el nombre de la rama."
 		return 1
 	fi
 

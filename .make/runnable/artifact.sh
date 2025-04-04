@@ -1,6 +1,6 @@
 #!/bin/bash
 
-case "$KIND" in
+case "$SOURCE_KIND" in
   maven)
     source "$SCRIPT_DIR/artifact/maven.sh"
     ;;

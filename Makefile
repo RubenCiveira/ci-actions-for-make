@@ -1,1 +1,1 @@
--include .make/include/common.mk .make/include/gitflow.mk 
+-include .make/include/common.mk .make/include/gitflow.mk .make/include/artifact.mk
